@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   AppBar,
   Toolbar,
@@ -8,7 +8,13 @@ import {
   makeStyles,
   Grid,
 } from "@material-ui/core";
+import { toast } from "react-toastify";
 import { useFormik } from "formik";
+import {
+  GetAsteroidInfo,
+  GetRandomAsteroidInfo,
+} from "./../../Services/NasaAsteroidServices";
+import { STATUS_OK } from "../../Helpers/Constants";
 
 const useStyles = makeStyles(() => ({
   mainContainer: {
@@ -62,6 +68,19 @@ const validate = (values) => {
 
 const HomePage = React.memo(() => {
   const classes = useStyles();
+  const [asteroidInfo, setAsteroidInfo] = useState();
+
+  const getRandomAsteroidInfo = useCallback(async () => {
+    const response = await GetRandomAsteroidInfo();
+    if (response.data && response.status === STATUS_OK) {
+      formik.setFieldValue(
+        "asteroidId",
+        response.data.near_earth_objects[0].id
+      );
+    } else {
+      toast.error("Something went wrong");
+    }
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -113,6 +132,7 @@ const HomePage = React.memo(() => {
               type="button"
               variant="contained"
               className={classes.submitBtn}
+              onClick={() => getRandomAsteroidInfo()}
             >
               Random Asteroid
             </Button>
