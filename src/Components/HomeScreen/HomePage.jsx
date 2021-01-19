@@ -3,7 +3,6 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  TextField,
   Button,
   makeStyles,
   Grid,
@@ -15,6 +14,7 @@ import {
   GetRandomAsteroidInfo,
 } from "./../../Services/NasaAsteroidServices";
 import { STATUS_OK } from "../../Helpers/Constants";
+import AsteroidInfo from "./../AsteroidInfo/AsteroidInfo";
 
 const useStyles = makeStyles(() => ({
   mainContainer: {
@@ -70,13 +70,22 @@ const HomePage = React.memo(() => {
   const classes = useStyles();
   const [asteroidInfo, setAsteroidInfo] = useState();
 
+  const geAsteroidInfo = useCallback(async (id) => {
+    const response = await GetAsteroidInfo(id);
+    if (response && response.data && response.status === STATUS_OK) {
+      setAsteroidInfo(response.data);
+    } else {
+      toast.error("Something went wrong");
+      setAsteroidInfo();
+    }
+  }, []);
+
   const getRandomAsteroidInfo = useCallback(async () => {
     const response = await GetRandomAsteroidInfo();
-    if (response.data && response.status === STATUS_OK) {
-      formik.setFieldValue(
-        "asteroidId",
-        response.data.near_earth_objects[0].id
-      );
+    if (response && response.data && response.status === STATUS_OK) {
+      const randomId = response.data.near_earth_objects[0].id;
+      formik.setFieldValue("asteroidId", randomId);
+      geAsteroidInfo(randomId);
     } else {
       toast.error("Something went wrong");
     }
@@ -89,7 +98,7 @@ const HomePage = React.memo(() => {
     validateOnChange: false,
     validate,
     onSubmit: (values) => {
-      console.log(values);
+      geAsteroidInfo(values.asteroidId);
     },
   });
 
@@ -137,6 +146,7 @@ const HomePage = React.memo(() => {
               Random Asteroid
             </Button>
           </div>
+          {asteroidInfo && <AsteroidInfo asteroidInfo={asteroidInfo} />}
         </Grid>
       </Grid>
     </>
