@@ -36,7 +36,29 @@ const useStyles = makeStyles(() => ({
     justifyContent: "flex-end",
     marginTop: "3%",
   },
+  error: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    color: "red",
+  },
+  submitBtn: {
+    backgroundColor: "#191a62e3",
+    color: "#ffffff",
+    textDecoration: "none",
+    "&:hover": {
+      backgroundColor: "#191a62e3",
+    },
+  },
 }));
+
+const validate = (values) => {
+  let errors = {};
+  if (!values.asteroidId) {
+    errors.asteroidId = "Please enter AsteroidId";
+    return errors;
+  }
+};
 
 const HomePage = React.memo(() => {
   const classes = useStyles();
@@ -45,6 +67,8 @@ const HomePage = React.memo(() => {
     initialValues: {
       asteroidId: "",
     },
+    validateOnChange: false,
+    validate,
     onSubmit: (values) => {
       console.log(values);
     },
@@ -67,14 +91,32 @@ const HomePage = React.memo(() => {
               name="asteroidId"
               className={classes.textbox}
               placeholder="Enter Asteroid ID"
-              required
-              fullWidth
               onChange={formik.handleChange}
             ></textarea>
+            {formik.errors && formik.errors.asteroidId && (
+              <div className={classes.error}>{formik.errors.asteroidId}</div>
+            )}
             <div className={classes.btnDiv}>
-              <Button variant="contained">Submit</Button>
+              <Button
+                disabled={!formik.values.asteroidId}
+                type="submit"
+                variant="contained"
+                className={classes.submitBtn}
+              >
+                Submit
+              </Button>
             </div>
           </form>
+          <br />
+          <div>
+            <Button
+              type="button"
+              variant="contained"
+              className={classes.submitBtn}
+            >
+              Random Asteroid
+            </Button>
+          </div>
         </Grid>
       </Grid>
     </>
